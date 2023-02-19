@@ -28,6 +28,7 @@ main() {
   [ -f "$KEYS_DISK" ] || err_exit '"keys" disk not found'
   sudo mount "$KEYS_DISK" "$KEYS_MNT"
   cp -r "$KEYS_MNT" "$KEYS_DIR"
+  sudo umount "$KEYS_MNT"
 }
 
 main
