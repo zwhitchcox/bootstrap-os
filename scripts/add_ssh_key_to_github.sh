@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 # # get list of keys
@@ -39,6 +38,7 @@ ensure_github_in_known_hosts() {
   local key_file
   local keys
   key_file="$HOME/.ssh/known_hosts"
+  touch $keyfile
   keys=$(ssh-keyscan -H github.com 2>/dev/null) || return 1
   (echo "$keys" ; cat "$key_file") | sort | uniq -u > "$key_file.tmp"
   mv "$key_file.tmp" "$key_file"

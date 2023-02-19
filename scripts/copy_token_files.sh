@@ -25,9 +25,9 @@ main() {
   ensure_empty_dir "$TOKEN_MNT"
   # create token directory
   ensure_empty_dir "$TOKEN_DIR"
-  [ -f "$TOKEN_DISK" ] || err_exit '"token" disk not found'
+  [ -e "$TOKEN_DISK" ] || err_exit '"token" disk not found'
   sudo mount "$TOKEN_DISK" "$TOKEN_MNT"
-  cp -r "$TOKEN_MNT" "$TOKEN_DIR"
+  cp -r "$TOKEN_MNT"/* "$TOKEN_DIR"
   sudo umount "$TOKEN_MNT"
 }
 

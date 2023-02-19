@@ -29,8 +29,8 @@ create_partition_table() {
 
 create_file_systems() {
   part_base="$(get_part_base "$disk")"
-  mkfs.fat -F 32 -n $LABEL "$part_base"1
-  mkfs.ext4 -L data "$part_base"2
+  sudo mkfs.fat -F 32 -n $LABEL "$part_base"1
+  sudo mkfs.ext4 -L data "$part_base"2
 }
 
 ensure_gh_token() {
@@ -40,10 +40,10 @@ ensure_gh_token() {
 }
 
 mount_token_fs() {
-  mkdir -p $TOKEN_MNT
+  mkdir -p "$TOKEN_MNT"
   sudo mount "/dev/disk/by-label/$LABEL" "$TOKEN_MNT"
-  echo "$GH_TOKEN" > "$TOKEN_MNT"/github
-  sudo umount $TOKEN_MNT
+  sudo bash -c 'echo "'$GH_TOKEN'" > "'$TOKEN_MNT'"/github'
+  sudo umount "$TOKEN_MNT"
 }
 
 create_partition_table
