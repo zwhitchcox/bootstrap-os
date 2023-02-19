@@ -29,28 +29,26 @@ err_exit() {
   exit 1
 }
 
-check_token() {
-  if [ -z "$GH_TOKEN" ]; then
-    if [ -n "$KEYFILE" ]; then
-      source $KEYFILE || return 1
-    fi
-    err_exit Need GH_TOKEN
-  fi
+ensure_github_token() {
+  [ -n "$GH_TOKEN" ] && return 0
+  [ -f "$TOKEN_DIR"/github ] && export GH_TOKEN="$(cat "$TOKEN_DIR"/github)" && return 0
+  err_exit "Couldn't find github token."
 }
 
-keygen() {
-  local key_file="$HOME/.ssh/id_rsa"
-  [ -f "$key_file" ] && return 0
-  local email
-  email="$(curl -s \
-    -H "Accept: application/vnd.github+json" \
-    -H "Authorization: token $GH_TOKEN" \
-    https://api.github.com/user/emails | jq -r '.[] | select(.primary == true) | .email')" || return 1
-  mkdir -p "$HOME/.ssh" || return 1
-  ssh-keygen -C "$email" -t rsa -b 4096 -f "$key_file" -P ''
+ensure_github_in_known_hosts() {
+  local key_file
+  local keys
+  key_file="$HOME/.ssh/known_hosts"
+  keys=$(ssh-keyscan -H github.com 2>/dev/null) || return 1
+  (echo "$keys" ; cat "$key_file") | sort | uniq -u > "$key_file.tmp"
+  mv "$key_file.tmp" "$key_file"
 }
 
-add_key() {
+ensure_ssh_key_exists() {
+  test -f ~/.ssh/id_rsa.pub || err_exit "~/.ssh/id_rsa.pub not found"
+}
+
+add_ssh_key_to_github() {
   local output
   output=$(
     curl -s \
@@ -70,22 +68,6 @@ add_key() {
   fi
 }
 
-
-# add github host keys to known hosts
-gh_add_host_keys() {
-  local key_file
-  local keys
-  key_file="$HOME/.ssh/known_hosts"
-  keys=$(ssh-keyscan -H github.com 2>/dev/null) || return 1
-  (echo "$keys" ; cat "$key_file") | sort | uniq -u > "$key_file.tmp"
-  mv "$key_file.tmp" "$key_file"
-}
-
-gh_keys() {
-  gh_add_host_keys
-  test -f ~/.ssh/id_rsa || keygen
-  add_key
-}
-# config gh
-check_token
-gh_keys
+ensure_github_token
+ensure_github_in_known_hosts
+add_ssh_key_to_github

@@ -1,13 +1,13 @@
 # copy key files (e.g. personal access token) from USB drive into temporary directory
 
+TOKEN_MNT=${TOKEN_MNT:-/tmp/token_mnt}
+TOKEN_DIR=${TOKEN_DIR:-/tmp/token}
+TOKEN_DISK=${TOKEN_DISK:-/dev/disk/by-label/token}
+
 err_exit() {
   echo "$@" > /dev/stderr
   exit 1
 }
-
-KEYS_MNT=${KEYS_MNT:-/tmp/boostrap_keys}
-KEYS_DIR=${KEYS_DIR:-/tmp/keys}
-KEYS_DISK=${KEYS_DISK:-/dev/disk/by-label/keys}
 
 ensure_empty_dir() {
   dir="$1"
@@ -22,13 +22,13 @@ ensure_empty_dir() {
 
 main() {
   # create mount point
-  ensure_empty_dir "$KEYS_MNT"
-  # create key directory
-  ensure_empty_dir "$KEYS_DIR"
-  [ -f "$KEYS_DISK" ] || err_exit '"keys" disk not found'
-  sudo mount "$KEYS_DISK" "$KEYS_MNT"
-  cp -r "$KEYS_MNT" "$KEYS_DIR"
-  sudo umount "$KEYS_MNT"
+  ensure_empty_dir "$TOKEN_MNT"
+  # create token directory
+  ensure_empty_dir "$TOKEN_DIR"
+  [ -f "$TOKEN_DISK" ] || err_exit '"token" disk not found'
+  sudo mount "$TOKEN_DISK" "$TOKEN_MNT"
+  cp -r "$TOKEN_MNT" "$TOKEN_DIR"
+  sudo umount "$TOKEN_MNT"
 }
 
 main
